@@ -1,21 +1,9 @@
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(modus-vivendi-tinted))
- '(package-selected-packages
-   '(corfu-terminal exec-path-from-shell magit marginalia vertico
-		    yasnippet)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file))
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (menu-bar-mode -1)
@@ -24,6 +12,11 @@
 (setq inhibit-startup-message t)
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
 (add-hook 'rust-ts-mode-hook #'eglot-ensure)
+(setq eglot-workspace-configuration
+      '(:rust-analyzer (:check (:command "clippy")
+			:cargo (:features "all")
+			:procMacro (:enable t)
+			:inlayHints (:enable t))))
 (use-package marginalia
 	     :ensure t
 	     :init (marginalia-mode))
@@ -38,3 +31,23 @@
 	     :init
 	     (global-corfu-mode)
 	     (corfu-popupinfo-mode))
+(require 'yasnippet)
+(yas-global-mode 1)
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic)))
+(use-package vertico
+	     :ensure t
+	     :init (vertico-mode))
+;; Structural editing for delimiters
+(use-package smartparens
+  :ensure t
+  :hook (rust-ts-mode . smartparens-mode))
+
+;; Project-wide search and navigation
+(use-package consult
+  :ensure t
+  :bind (("C-s" . consult-line)
+         ("M-g g" . consult-goto-line)
+         ("C-c s" . consult-ripgrep)))
