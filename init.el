@@ -51,3 +51,56 @@
   :bind (("C-s" . consult-line)
          ("M-g g" . consult-goto-line)
          ("C-c s" . consult-ripgrep)))
+
+;; LLM integration (Claude, GPT, etc.)
+(use-package gptel
+  :ensure t
+  :config
+  (setq gptel-model 'claude-sonnet-4-20250514
+        gptel-backend (gptel-make-anthropic "Claude"
+                        :stream t
+                        :key #'gptel-api-key-from-auth-source)))
+
+;; Show available keybindings in popup
+(use-package which-key
+  :ensure t
+  :init (which-key-mode))
+
+;; Context actions on any target
+(use-package embark
+  :ensure t
+  :bind (("C-." . embark-act)
+         ("C-;" . embark-dwim)))
+(use-package embark-consult
+  :ensure t
+  :after (embark consult))
+
+;; Debug Adapter Protocol (use with codelldb for Rust)
+(use-package dape
+  :ensure t)
+
+;; Show git changes in fringe
+(use-package diff-hl
+  :ensure t
+  :hook ((prog-mode . diff-hl-mode)
+         (magit-post-refresh . diff-hl-magit-post-refresh)))
+
+;; Additional completion-at-point backends for corfu
+(use-package cape
+  :ensure t
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev))
+
+;; Auto-install tree-sitter grammars
+(use-package treesit-auto
+  :ensure t
+  :config
+  (global-treesit-auto-mode))
+
+;; envrc: Per-project environment variables via direnv
+;; Reads .envrc files for project-specific env (e.g., different Rust toolchains)
+;; Requires direnv to be installed: pkg install direnv
+;; (use-package envrc
+;;   :ensure t
+;;   :hook (after-init . envrc-global-mode))
